@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图像识别界面</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            display: flex;
+            width: 80%;
+            height: 80vh;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .image-box {
+            width: 40%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #ccc;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-box svg {
+            width: 100px;
+            height: 100px;
+            fill: #777;
+        }
+
+        .image-box p {
+            color: #999;
+            margin-top: 10px;
+        }
+
+        .button-container {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .button-container button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .image-box img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 左侧上传框 -->
+        <div class="image-box" id="left-image-box">
+            <svg t="1738807364006" class="icon" viewBox="0 0 1177 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7922" width="200" height="200">
+            <path d="M263.33324368 557.00020214a269.99986465 269.99986465 0 1 0 539.99972929 0H263.33324368z" fill="#000000" p-id="7923"></path>
+            <path d="M375.83318744 399.50028125m-67.49996661 0a67.4999666 67.4999666 0 1 0 134.99993232 0 67.4999666 67.4999666 0 1 0-134.99993232 0Z" fill="#000000" p-id="7924"></path>
+            <path d="M375.83318744 399.50028125m-67.49996661 0a67.4999666 67.4999666 0 1 0 134.99993232 0 67.4999666 67.4999666 0 1 0-134.99993232 0Z" fill="#000000" p-id="7925"></path>
+            <path d="M690.83302923 399.50028125m-67.49996572 0a67.4999666 67.4999666 0 1 0 134.99993232 0 67.4999666 67.4999666 0 1 0-134.99993232 0Z" fill="#000000" p-id="7926"></path>
+            <path d="M735.42800726 109.83542627A448.10977588 448.10977588 0 0 0 533.33310833 62.00045C284.79823226 62.00045 83.33333333 263.46534893 83.33333333 512.000225s201.46489893 449.999775 449.999775 449.999775 449.999775-201.46489893 449.999775-449.999775c-17.99999122-26.09998682-32.6699833-26.09998682-43.96497803 0-2.02499912 4.67999737 0 95.12995253-44.86497715 183.19490859-44.90997715 88.10995605-40.40997979 76.94996133-132.43493407 150.52492441-92.0249543 73.52996309-220.04989013 73.52996309-228.73488575 73.52996309-41.93997891 0-407.24979609-36.71998154-407.24979609-407.24979609 0-187.51490596 137.78993144-377.90981104 364.76981718-402.16479873 87.97495606-9.4049956 161.09991914 4.09499824 219.50989014 40.49997979 13.72499297-4.45499737 22.09498857-9.0899956 25.0649877-13.85999297 2.60999912-4.22999824 2.60999912-13.09499385 0-26.63998682z" fill="#000000" p-id="7927"></path>
+            <path d="M983.33288333 223.82036914h109.5299455c9.89999473 3.73499824 14.80499297 11.24999472 14.8049921 22.49998857s-4.94999737 18.76499033-14.8049921 22.49998857H983.33288333V377.00029268c-2.69999824 12.01499385-10.16999473 17.99999122-22.49998857 17.9999912s-19.79999033-5.98499737-22.49998858-17.9999912V268.82034628h-115.46994287c-8.8649956 0-13.31999297-7.51499648-13.31999297-22.49998857 0-15.02999209 4.45499737-22.49998857 13.31999297-22.49998857H938.33290618V107.00042715c0-14.44499297 7.51499648-21.68998945 22.49998858-21.68998858 14.98499209 0 22.49998857 7.19999648 22.49998857 21.68998858v116.81994199z" fill="#000000" p-id="7928"></path></svg>
+            <p>点击此处选择图片</p>
+            <input type="file" id="left-image-input" accept="image/png, image/jpeg">
+        </div>
+
+        <!-- 识别按钮 -->
+        <div class="button-container">
+            <button id="recognize-button">识别</button>
+        </div>
+
+        <!-- 右侧显示框 -->
+        <div class="image-box" id="right-image-box">
+            <!-- 这里用于显示处理后的图片 -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const fileInput = document.getElementById('left-image-input');
+            const leftImageBox = document.getElementById('left-image-box');
+            const recognizeButton = document.getElementById('recognize-button');
+            const rightImageBox = document.getElementById('right-image-box');
+
+            if (!fileInput) {
+                console.error("错误：找不到 input 元素，请检查 HTML 结构！");
+                return;
+            }
+
+            console.log("页面加载完成，前端 JS 脚本初始化成功");
+
+            // 点击左侧框打开文件选择
+            leftImageBox.addEventListener('click', function () {
+                console.log("左侧图像框被点击，打开文件选择窗口");
+                fileInput.click();
+            });
+
+            // 监听文件选择
+            fileInput.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+
+                if (file) {
+                    console.log("用户选择了文件:", file.name);
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        console.log("读取文件成功，更新左侧预览");
+                        leftImageBox.innerHTML = ''; // 清空原内容
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = '上传的图片';
+                        leftImageBox.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    console.warn("用户未选择任何文件");
+                }
+            });
+
+            // 识别按钮点击事件
+            recognizeButton.addEventListener('click', function () {
+                console.log("识别按钮被点击");
+
+                const file = fileInput.files[0];
+                if (!file) {
+                    alert('请先选择一张图片！');
+                    console.warn("识别请求失败：未选择图片");
+                    return;
+                }
+
+                console.log("准备上传图片:", file.name);
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                console.log("发送图片到后端...");
+                fetch('/upload-image/', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => {
+                    console.log("请求已发送，等待服务器响应...");
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("服务器返回数据:", data);
+                    if (data.status === 'success') {
+                        alert('图片上传成功！');
+                        console.log('文件保存路径：', data.file_path);
+                    } else {
+                        alert('图片上传失败：' + data.message);
+                        console.error("上传失败，服务器返回错误:", data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('上传失败，发生错误:', error);
+                    alert('上传失败，请重试！');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
