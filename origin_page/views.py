@@ -76,14 +76,25 @@ def get_unprocessed_images(request):
 def mark_image_received(request):
     if request.method == 'POST':
         try:
-            image_id = request.POST.get('image_id')
-            image = ImageFile.objects.get(id=image_id, status='pending')
-            image.status = 'received'
-            image.save()
-            return JsonResponse({"status": "success", "message": "Image marked as received"})
-        except ImageFile.DoesNotExist:
-            return JsonResponse({"status": "error", "message": "Image not found or already processed"}, status=404)
-    
+            # 获取 image_id 列表
+            image_ids = request.POST.getlist('image_id')
+            success_count = 0
+            for image_id in image_ids:
+                try:
+                    # 查找状态为 'pending' 的图片
+                    image = ImageFile.objects.get(id=image_id, status='pending')
+                    # 将图片状态标记为 'received'
+                    image.status = 'received'
+                    image.save()
+                    success_count += 1
+                except ImageFile.DoesNotExist:
+                    continue
+            if success_count > 0:
+                return JsonResponse({"status": "success", "message": f"{success_count} images marked as received"})
+            else:
+                return JsonResponse({"status": "error", "message": "Image not found or already processed"}, status=404)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": f"Error processing request: {str(e)}"}, status=500)
     return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
 # 上传已处理图片
