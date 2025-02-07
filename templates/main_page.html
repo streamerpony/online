@@ -169,7 +169,7 @@
                 formData.append('file', file);
 
                 console.log("发送图片到后端...");
-                fetch('/upload-image/', {
+                fetch('/api/upload/', {
                     method: 'POST',
                     body: formData,
                 })
