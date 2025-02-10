@@ -103,14 +103,24 @@ def upload_processed_image(request):
             return JsonResponse({"status": "error", "message": "Missing image_id or file"}, status=400)
 
         try:
+            # 查找状态为 'received' 的图片
             image = ImageFile.objects.get(id=image_id, status='received')
+
+            # 检查文件格式
+            if not processed_file.name.endswith(('.jpg', '.jpeg', '.png')):
+                return JsonResponse({"status": "error", "message": "Unsupported file type"}, status=400)
+
+            # 创建处理后的文件保存路径
             processed_file_name = f"processed_{image.file_name}"
             processed_file_path = default_storage.save(f"processed/{processed_file_name}", ContentFile(processed_file.read()))
-            
+
+            # 更新图片状态为 'processed' 并保存处理文件路径
             image.status = 'processed'
+            image.processed_file_path = processed_file_path  # 假设有字段保存处理后文件路径
             image.save()
-            
+
             return JsonResponse({"status": "success", "file_path": processed_file_path})
+
         except ImageFile.DoesNotExist:
             return JsonResponse({"status": "error", "message": "Image not found or not in received state"}, status=404)
     
