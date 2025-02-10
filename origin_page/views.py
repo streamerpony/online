@@ -29,11 +29,6 @@ def main_page(request):
 @csrf_exempt
 def upload_image(request):
 
-    print("收到上传请求")  
-    print("请求方式:", request.method)  
-    print("请求内容:", request.POST)  
-    print("上传文件:", request.FILES)  
-
     if request.method == 'POST':
         if 'file' not in request.FILES:
             return JsonResponse({"status": "error", "message": "No file uploaded"}, status=400)
