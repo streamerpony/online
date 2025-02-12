@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.utils.timezone import now
-from .models import ImageFile
-from django.http import JsonResponse
 from django.conf import settings
-from .models import ImageFile
+from django.http import JsonResponse
+from .models import ImageFile 
+import queue
+import os
+
 
 # 人机验证页面
 def human_verification(request):
@@ -43,7 +44,7 @@ def upload_image(request):
         # 记录到数据库
         image = ImageFile.objects.create(file_name=unique_file_name, file_path=file_path, status='pending')
         
-        return JsonResponse({"status": "success", "file_path": file_path, "id": image.id})
+        return JsonResponse({"status": "success", "file_path": file_path, "id": image.id, "file_name": unique_file_name})
     
     return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
@@ -92,7 +93,8 @@ def mark_image_received(request):
             return JsonResponse({"status": "error", "message": f"Error processing request: {str(e)}"}, status=500)
     return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
-# 上传已处理图片
+
+
 @csrf_exempt
 def upload_processed_image(request):
     if request.method == 'POST':
@@ -125,3 +127,29 @@ def upload_processed_image(request):
             return JsonResponse({"status": "error", "message": "Image not found or not in received state"}, status=404)
     
     return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+
+def check_processed_image(request):
+    file_name = request.GET.get('file_name')
+    if not file_name:
+        return JsonResponse({
+            'status': 'error',
+            'message': '缺少 file_name 参数',
+        }, status=400)
+
+    # 检查处理后的图像是否存在
+    processed_file_name = f'processed_{file_name}'
+    processed_file_path = os.path.join(settings.MEDIA_ROOT, 'processed', processed_file_name)
+
+    if os.path.exists(processed_file_path):
+        # 返回处理后的图像 URL
+        return JsonResponse({
+            "status": "ready",
+            "file_url": f"{settings.MEDIA_URL}processed/{processed_file_name}",
+        })
+    else:
+        # 图像仍在处理中
+        return JsonResponse({
+            "status": "processing",
+            "message": "图像仍在处理中",
+        })

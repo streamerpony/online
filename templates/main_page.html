@@ -111,88 +111,125 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const fileInput = document.getElementById('left-image-input');
-            const leftImageBox = document.getElementById('left-image-box');
-            const recognizeButton = document.getElementById('recognize-button');
-            const rightImageBox = document.getElementById('right-image-box');
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const fileInput = document.getElementById('left-image-input');
+        const leftImageBox = document.getElementById('left-image-box');
+        const recognizeButton = document.getElementById('recognize-button');
+        const rightImageBox = document.getElementById('right-image-box');
 
-            if (!fileInput) {
-                console.error("错误：找不到 input 元素，请检查 HTML 结构！");
+        if (!fileInput) {
+            console.error("❌ 错误：找不到 input 元素，请检查 HTML 结构！");
+            return;
+        }
+
+        console.log("✅ 页面加载完成，前端 JS 脚本初始化成功");
+
+        // === 📂 监听左侧图片选择 ===
+        leftImageBox.addEventListener('click', function () {
+            console.log("🖱️ 左侧图像框被点击，打开文件选择窗口");
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+
+            if (file) {
+                console.log("📁 用户选择了文件:", file.name);
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    console.log("📸 读取文件成功，更新左侧预览");
+                    leftImageBox.innerHTML = ''; // 清空原内容
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = '上传的图片';
+                    leftImageBox.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                console.warn("⚠️ 用户未选择任何文件");
+            }
+        });
+
+        // === 🚀 识别按钮事件 ===
+        recognizeButton.addEventListener('click', function () {
+            console.log("🎯 识别按钮被点击");
+
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('请先选择一张图片！');
+                console.warn("❌ 识别请求失败：未选择图片");
                 return;
             }
 
-            console.log("页面加载完成，前端 JS 脚本初始化成功");
+            console.log("📤 准备上传图片:", file.name);
 
-            // 点击左侧框打开文件选择
-            leftImageBox.addEventListener('click', function () {
-                console.log("左侧图像框被点击，打开文件选择窗口");
-                fileInput.click();
-            });
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('file_name', file.name);
 
-            // 监听文件选择
-            fileInput.addEventListener('change', function (event) {
-                const file = event.target.files[0];
-
-                if (file) {
-                    console.log("用户选择了文件:", file.name);
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        console.log("读取文件成功，更新左侧预览");
-                        leftImageBox.innerHTML = ''; // 清空原内容
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.alt = '上传的图片';
-                        leftImageBox.appendChild(img);
-                    };
-                    reader.readAsDataURL(file);
+            console.log("⏳ 发送图片到后端...");
+            fetch('/api/upload/', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => {
+                console.log("📡 请求已发送，等待服务器响应...");
+                return response.json();
+            })
+            .then(data => {
+                console.log("📩 服务器返回数据:", data);
+                if (data.status === 'success') {
+                    alert('✅ 图片上传成功！');
+                    console.log('🖼️ 文件保存路径：', file.file_path);
+                    console.log('🖼️ 文件名称：', data.file_name);
+                    // 启动轮询，检查处理后的图像
+                    startPolling(data.file_name);
                 } else {
-                    console.warn("用户未选择任何文件");
+                    alert('❌ 图片上传失败：' + data.message);
+                    console.error("❌ 上传失败，服务器返回错误:", data.message);
                 }
-            });
-
-            // 识别按钮点击事件
-            recognizeButton.addEventListener('click', function () {
-                console.log("识别按钮被点击");
-
-                const file = fileInput.files[0];
-                if (!file) {
-                    alert('请先选择一张图片！');
-                    console.warn("识别请求失败：未选择图片");
-                    return;
-                }
-
-                console.log("准备上传图片:", file.name);
-
-                const formData = new FormData();
-                formData.append('file', file);
-
-                console.log("发送图片到后端...");
-                fetch('/api/upload/', {
-                    method: 'POST',
-                    body: formData,
-                })
-                .then(response => {
-                    console.log("请求已发送，等待服务器响应...");
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("服务器返回数据:", data);
-                    if (data.status === 'success') {
-                        alert('图片上传成功！');
-                        console.log('文件保存路径：', data.file_path);
-                    } else {
-                        alert('图片上传失败：' + data.message);
-                        console.error("上传失败，服务器返回错误:", data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('上传失败，发生错误:', error);
-                    alert('上传失败，请重试！');
-                });
+            })
+            .catch(error => {
+                console.error('❌ 上传失败，发生错误:', error);
+                alert('上传失败，请重试！');
             });
         });
-    </script>
+
+        // === 🔄 轮询逻辑 ===
+        function startPolling(fileName) {
+            console.log("🔄 启动轮询，检查处理后的图像...");
+
+            const interval = setInterval(() => {
+                fetch(`/api/check_processed_image/?file_name=${fileName}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("📩 轮询结果:", data);
+
+                        if (data.status === 'ready') {
+                            console.log("🖼️ 处理后的图像已准备好:", data.file_url);
+                            rightImageBox.innerHTML = ''; // 清空
+                            const img = document.createElement('img');
+                            img.src = data.file_url + `?t=${new Date().getTime()}`; // 🚀 **防止缓存**
+                            img.alt = '已处理的图像';
+                            img.style.maxWidth = '100%'; // 防止超出
+                            rightImageBox.appendChild(img);
+
+                            clearInterval(interval); // 停止轮询
+                        } else if (data.status === 'processing') {
+                            console.log("⏳ 图像仍在处理中...");
+                        } else {
+                            console.error("❌ 轮询失败:", data.message);
+                            clearInterval(interval); // 停止轮询
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ 轮询失败，发生错误:', error);
+                        clearInterval(interval); // 停止轮询
+                    });
+            }, 3000); // 每 3 秒轮询一次
+        }
+    });
+</script>
 </body>
 </html>

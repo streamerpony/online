@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/unprocessed/', views.get_unprocessed_images, name='get_unprocessed_images'),  # 获取未处理图片列表
     path('api/mark_received/', views.mark_image_received, name='mark_image_received'),  # 确认图片已接收
     path('api/upload_processed/', views.upload_processed_image, name='upload_processed_image'),  # 上传已处理图片
+    path('api/check_processed_image/', views.check_processed_image, name='check_processed_image'),#前端检测图片是否已处理
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
